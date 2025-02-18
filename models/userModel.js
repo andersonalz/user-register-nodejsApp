@@ -4,16 +4,73 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: {
+    name: {
     type: String,
-    required: [true, 'Please tell us your name!']
+    default: "",
+    trim: true,
   },
-  email: {
+  lastName: {
     type: String,
-    required: [true, 'Please provide your email'],
+    default: "",
+    trim: true,
+  },
+  nationalCode: {
+    type: String,
     unique: true,
-    lowercase: true,
-    validate: [validator.isEmail, 'Please provide a valid email']
+    trim: true,
+  },
+  identityNumber: {
+    type: String,
+    default: "",
+    trim: true,
+  },
+  fatherName: {
+    type: String,
+    default: "",
+    trim: true,
+  },
+  birthYear: {
+    type: Number,
+  },
+  birthMonth: {
+    type: Number,
+  },
+  birthDay: {
+    type: Number,
+  },
+  insuranceStart: {
+    type: Date,
+    default: null,
+  },
+  insuranceEnd: {
+    type: Date,
+    default: null,
+  },
+  gender: {
+    type: String,
+  },
+  insuredType: {
+    type: String,
+  },
+  relationWithInsured: {
+    type: String,
+    default: "",
+    trim: true,
+  },
+  dependentType: {
+    type: String,
+    default: "",
+    trim: true,
+  },
+  phoneNumber: {
+    type: String,
+    unique: true,
+  },
+  bankAccountIBAN: {
+    type: String,
+    // required: [true, 'Please provide your IBAN'],
+    unique: true,
+    trim: true,
   },
   photo: {
     type: String,
@@ -26,13 +83,13 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Please provide a password'],
+    // required: [true, 'Please provide a password'],
     minlength: 8,
     select: false
   },
   passwordConfirm: {
     type: String,
-    required: [true, 'Please confirm your password'],
+    // required: [true, 'Please confirm your password'],
     validate: {
       // This only works on CREATE and SAVE!!!
       validator: function(el) {
@@ -115,3 +172,5 @@ userSchema.methods.createPasswordResetToken = function() {
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
+
+

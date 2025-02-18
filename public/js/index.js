@@ -7,9 +7,11 @@
 
 // // DOM ELEMENTS
 // const mapBox = document.getElementById('map');
+
 const loginForm = document.querySelector('.form--login');
 const loginFormByPhoneNumber = document.querySelector('.form--loginByPhoneNumber');
 const logOutBtn = document.querySelector('.nav__el--logout');
+const resendCode = document.getElementById('resendverifycode')
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
 const bookBtn = document.getElementById('book-tour');
@@ -30,10 +32,64 @@ if (loginForm)
   if (loginFormByPhoneNumber)
   loginFormByPhoneNumber.addEventListener('submit', e => {
     e.preventDefault();
+    const submitButton = e.submitter;
     const phoneNumber = document.getElementById('phoneNumber').value;
-    loginByPhoneNumber(phoneNumber);
+    const verifyCodeInput = document.getElementById('verifyCodeInput');
+    if (submitButton.id === 'resendverifycode') {
+      sendSmsPhoneNumber(phoneNumber);
+      return
+    }
+    if(phoneNumber && !verifyCodeInput.value){
+      sendSmsPhoneNumber(phoneNumber);
+    }else {
+      loginByPhoneNumber(phoneNumber, verifyCodeInput.value)
+    }
+    
   });
 
+  const sendSmsPhoneNumber = async (phoneNumber) => {
+  try {
+    const res = await axios({
+      method: 'GET',
+      url: `/api/v1/users/sendSms/${phoneNumber}`,
+      data: {
+        phoneNumber,
+      }
+    });
+    if (res.data.status === 'success') {
+      document.getElementById('btnLogin').innerText = 'enter verify Code'
+      document.getElementById('verifyCodeTitle').style.display = 'block'
+      document.getElementById('verifyCodeInput').style.display = 'block'
+      document.getElementById('resendverifycode').style.display = 'block'
+      showAlert('success', 'send sms successfully!');
+    }else{
+      showAlert('error', 'try again');
+    }
+  } catch (err) {
+    showAlert('error', err);
+  }
+};
+
+  const loginByPhoneNumber = async (phoneNumber, verifyCode) => {
+  try {
+    const res = await axios({
+      method: 'POST',
+      url: '/api/v1/users/loginByPhoneNumber',
+      data: {
+        phoneNumber,
+        verifyCode
+      }
+    });
+    if (res.data.status === 'success') {
+      showAlert('success', 'Logged in successfully!');
+      window.setTimeout(() => {
+        location.assign('/me');
+      }, 1500);
+    }
+  } catch (err) {
+    showAlert('error', err.response.data.message);
+  }
+};
 
 
 if (logOutBtn) logOutBtn.addEventListener('click', logout);
@@ -44,7 +100,6 @@ if (userDataForm)
     const form = new FormData();
     form.append('name', document.getElementById('name').value);
     form.append('email', document.getElementById('email').value);
-    form.append('photo', document.getElementById('photo').files[0]);
 
     updateSettings(form, 'data');
   });
@@ -78,28 +133,6 @@ if (bookBtn)
 const alertMessage = document.querySelector('body').dataset.alert;
 if (alertMessage) showAlert('success', alertMessage, 20);
 
-const loginByPhoneNumber = async (phoneNumber) => {
-  console.log("🚀 ~ loginByPhoneNumber ~ phoneNumber:", phoneNumber)
-  try {
-    const res = await axios({
-      method: 'POST',
-      url: '/api/v1/users/login',
-      data: {
-        email,
-        password
-      }
-    });
-
-    if (res.data.status === 'success') {
-      showAlert('success', 'Logged in successfully!');
-      window.setTimeout(() => {
-        location.assign('/');
-      }, 1500);
-    }
-  } catch (err) {
-    showAlert('error', err.response.data.message);
-  }
-};
 
 const login = async (email, password) => {
   try {
@@ -151,6 +184,7 @@ const showAlert = (type, msg, time = 7) => {
 };
 ////////////////////////////////////////////////////////////////////////////////////update setting
 const updateSettings = async (data, type) => {
+  console.log("🚀 ~ updateSettings ~ data:", data)
   try {
     const url =
       type === 'password'

@@ -11,57 +11,77 @@ block content
   main.main
     .user-view
       nav.user-view__menu
-        ul.side-nav
-          +navItem('#', 'Settings', 'settings', true)
-          +navItem('/my-tours', 'My bookings', 'briefcase')
-          +navItem('#', 'My reviews', 'star')
-          +navItem('#', 'Billing', 'credit-card')
-
-        - if (user.role === 'admin')
-          .admin-nav
-            h5.admin-nav__heading Admin
-            ul.side-nav
-              +navItem('#', 'Manage tours', 'map')
-              +navItem('#', 'Manage users', 'users')
-              +navItem('#', 'Manage reviews', 'star')
-              +navItem('#', 'Manage bookings', 'briefcase')
-
       .user-view__content
         .user-view__form-container
-          h2.heading-secondary.ma-bt-md Your account settings
+          h2.heading-secondary.ma-bt-md Your account
           
           //- WITHOUT API
           //- form.form.form-user-data(action='/submit-user-data' method='POST' enctype='multipart/form-data')
           
           //- WITH API
           form.form.form-user-data
-            .form__group
-              label.form__label(for='name') Name
-              input#name.form__input(type='text', value=`${user.name}`, required, name='name')
+            .de-flex
+              .form__group
+                label.form__label(for='name') نام
+                input#name.form__input(type='text', value=`${user.name}`, name='name')
+              .form__group.ma-bt-md
+                label.form__label(for='lastName') نام خانوادگی
+                input#lastName.form__input(type='text', value=`${user.lastName ? "" : user.lastName}`, name='lastName')
+              .form__group.ma-bt-md
+                label.form__label(for='nationalCode') کد ملی
+                input#nationalCode.form__input(type='text', value=`${user.nationalCode ? user.nationalCode : ""}`, name='nationalCode')
+              .form__group.ma-bt-md
+                label.form__label(for='identityNumber') شماره شناسنامه
+                input#identityNumber.form__input(type='text', value=`${user.identityNumber}`, name='identityNumber')
+            .de-flex
+                .form__group.ma-bt-md
+                  label.form__label(for='fatherName') نام پدر
+                  input#fatherName.form__input(type='text', value=`${user.fatherName}`, name='fatherName')
+                .form__group.ma-bt-md
+                  label.form__label(for='birthYear') سال تولد
+                  input#birthYear.form__input(type='number', value=`${user.birthYear}`, name='birthYear')
+                .form__group.ma-bt-md
+                  label.form__label(for='birthMonth') ماه تولد
+                  input#birthMonth.form__input(type='number', value=`${user.birthMonth}`, name='birthMonth')
+                .form__group.ma-bt-md
+                  label.form__label(for='birthDay') روز تولد
+                  input#birthDay.form__input(type='number', value=`${user.birthDay}`, name='birthDay')
+                .form__group.ma-bt-md
+                  label.form__label(for='insuranceStart') شروع بیمه
+                  input#insuranceStart.form__input(type='text', value=`${user.insuranceStart ? user.insuranceStart : ""}`, name='insuranceStart')
+            .de-flex
+              .form__group.ma-bt-md
+                label.form__label(for='insuranceEnd') پایان بیمه
+                input#insuranceEnd.form__input(type='text', value=`${user.insuranceEnd ? user.insuranceEnd : ""}`, name='insuranceEnd')
+              .form__group.ma-bt-md
+                label.form__label(for='insuredType') نوع بیمه
+                input#insuredType.form__input(type='text', value=`${user.insuredType ? user.insuredType : ""}`, name='insuredType')
+              .form__group.ma-bt-md
+                label.form__label(for='relationWithInsured') نسبت با بیمه شده
+                input#relationWithInsured.form__input(type='text', value=`${user.relationWithInsured ? user.relationWithInsured : "" }`, name='relationWithInsured')
+              .form__group.ma-bt-md
+                label.form__label(for='dependentType') نوع تحت کفل
+                input#dependentType.form__input(type='text', value=`${user.dependentType ? user.dependentType : ""}`, name='dependentType')
+              .form__group.ma-bt-md
+                label.form__label(for='phoneNumber') شماره موبایل
+                input#phoneNumber.form__input(type='tel', value=`${user.phoneNumber}`, name='phoneNumber')
             .form__group.ma-bt-md
-              label.form__label(for='email') Email address
-              input#email.form__input(type='email', value=`${user.email}`, required, name='email')
-            .form__group.form__photo-upload
-              img.form__user-photo(src=`/img/users/${user.photo}`, alt='User photo')
-              input.form__upload(type='file', accept='image/*', id='photo', name='photo')
-              label(for='photo') Choose new photo
-              
+              label.form__label(for='bankAccountIBAN') شماره شبا حساب  
+              input#bankAccountIBAN.form__input(type='text', value=`${user.bankAccountIBAN ? user.bankAccountIBAN : ""}`, name='bankAccountIBAN')
             .form__group.right
-              button.btn.btn--small.btn--green Save settings
-              
-        .line &nbsp;
+              button.btn.btn--small.btn--green Save settings  
         
-        .user-view__form-container
-          h2.heading-secondary.ma-bt-md Password change
-          form.form.form-user-password
-            .form__group
-              label.form__label(for='password-current') Current password
-              input#password-current.form__input(type='password', placeholder='••••••••', required, minlength='8')
-            .form__group
-              label.form__label(for='password') New password
-              input#password.form__input(type='password', placeholder='••••••••', required, minlength='8')
-            .form__group.ma-bt-lg
-              label.form__label(for='password-confirm') Confirm password
-              input#password-confirm.form__input(type='password', placeholder='••••••••', required, minlength='8')
-            .form__group.right
-              button.btn.btn--small.btn--green.btn--save-password Save password
+        //- .user-view__form-container
+        //-   h2.heading-secondary.ma-bt-md Password change
+        //-   form.form.form-user-password
+        //-     .form__group
+        //-       label.form__label(for='password-current') Current password
+        //-       input#password-current.form__input(type='password', placeholder='••••••••', required, minlength='8')
+        //-     .form__group
+        //-       label.form__label(for='password') New password
+        //-       input#password.form__input(type='password', placeholder='••••••••', required, minlength='8')
+        //-     .form__group.ma-bt-lg
+        //-       label.form__label(for='password-confirm') Confirm password
+        //-       input#password-confirm.form__input(type='password', placeholder='••••••••', required, minlength='8')
+        //-     .form__group.right
+        //-       button.btn.btn--small.btn--green.btn--save-password Save password

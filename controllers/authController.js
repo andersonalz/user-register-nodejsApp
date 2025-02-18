@@ -5,10 +5,15 @@ const User = require('./../models/userModel');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const Email = require('./../utils/email');
+const axios = require('axios');
 
-const signToken = id => {
+userVerify = {
+  '09175686964': 9958400,
+};
+
+const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
+    expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
 
@@ -17,10 +22,10 @@ const createSendToken = (user, statusCode, req, res) => {
 
   res.cookie('jwt', token, {
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
     ),
     httpOnly: true,
-    secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
   });
 
   // Remove password from output
@@ -30,8 +35,8 @@ const createSendToken = (user, statusCode, req, res) => {
     status: 'success',
     token,
     data: {
-      user
-    }
+      user,
+    },
   });
 };
 
@@ -40,7 +45,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm
+    passwordConfirm: req.body.passwordConfirm,
   });
 
   const url = `${req.protocol}://${req.get('host')}/me`;
@@ -52,7 +57,6 @@ exports.signup = catchAsync(async (req, res, next) => {
 
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
-  console.log("🚀 ~ exports.login=catchAsync ~ email, password:", email, password)
 
   // 1) Check if email and password exist
   if (!email || !password) {
@@ -69,11 +73,115 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, req, res);
 });
 
+exports.loginByPhoneNumber = catchAsync(async (req, res, next) => {
+  const { phoneNumber, verifyCode } = req.body;
+  // 1) Check if email and password exist
+  if (!phoneNumber || !verifyCode) {
+    return next(new AppError('Please provide phoneNumber!', 400));
+  }
+  // 2) Check if user exists && password is correct
+  const user = userVerify[phoneNumber] == verifyCode ? true : false;
+  let findUser
+  if (!user) {
+    return next(new AppError('Incorrect code', 401));
+  } else {
+    findUser = await User.findOne({ phoneNumber });
+    if (!findUser) {
+      await User.create({ phoneNumber });
+    }
+  }
+
+  // 3) If everything ok, send token to client
+  createSendToken(findUser, 200, req, res);
+});
+
 exports.logout = (req, res) => {
   res.cookie('jwt', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true
+    httpOnly: true,
   });
+  res.status(200).json({ status: 'success' });
+};
+
+function checkNumber(recipients) {
+  let reg = /^09\d{9}$/;
+  let reg2 = /^989\d{9}$/;
+  for (let i = 0; i < recipients.length; i++) {
+    let ele = recipients[i];
+    if (!reg.test(ele) && !reg2.test(ele)) {
+      console.log(ele, ' is not valid number');
+      return false;
+    }
+  }
+  return true;
+}
+
+sendsms = async (text, recipients) => {
+  let response = {
+    success: false,
+    message: 'Failed to send',
+  };
+  if (
+    !process.env.USE_SMSPANEL ||
+    !process.env.SMS_URL ||
+    !process.env.SMS_AUTH
+  ) {
+    throw new AppError('bad set env variable');
+  }
+
+  let checkNum = checkNumber(recipients);
+
+  if (!checkNum) {
+    throw new AppError('phone number is not a correct');
+  }
+
+  switch (process.env.USE_SMSPANEL) {
+    case 'magfa':
+      const url = process.env.SMS_URL;
+      const pass = process.env.SMS_AUTH;
+      let data = {
+        senders: ['98300041960'],
+        messages: [text],
+        recipients: recipients,
+      };
+      let config = {
+        headers: {
+          accept: 'application/json',
+          'cache-control': 'no-cache',
+          Authorization: pass,
+        },
+      };
+      try {
+        const sendSms = await axios.post(url, data, config);
+        if (sendSms?.data?.status === 0) {
+          response.success = true;
+          response.message = sendSms?.data?.messages;
+        } else {
+          response.message = sendSms?.data?.messages;
+          console.log(sendSms?.data?.messages, sendSms?.data?.status);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+      return response;
+    default:
+      break;
+  }
+};
+
+function generateRandom7DigitNumber() {
+  return Math.floor(10000 + Math.random() * 90000);
+}
+
+exports.sendVerifyCode = async (req, res) => {
+  const { phoneNumber } = req.params;
+  try {
+    const gussNumber = generateRandom7DigitNumber();
+    userVerify[phoneNumber] = gussNumber;
+    const response = await sendsms(gussNumber.toString(), [phoneNumber]);
+  } catch (error) {
+    console.log(error);
+  }
   res.status(200).json({ status: 'success' });
 };
 
@@ -91,7 +199,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   if (!token) {
     return next(
-      new AppError('You are not logged in! Please log in to get access.', 401)
+      new AppError('You are not logged in! Please log in to get access.', 401),
     );
   }
 
@@ -104,15 +212,15 @@ exports.protect = catchAsync(async (req, res, next) => {
     return next(
       new AppError(
         'The user belonging to this token does no longer exist.',
-        401
-      )
+        401,
+      ),
     );
   }
 
   // 4) Check if user changed password after the token was issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
-      new AppError('User recently changed password! Please log in again.', 401)
+      new AppError('User recently changed password! Please log in again.', 401),
     );
   }
 
@@ -129,7 +237,7 @@ exports.isLoggedIn = async (req, res, next) => {
       // 1) verify token
       const decoded = await promisify(jwt.verify)(
         req.cookies.jwt,
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
       );
 
       // 2) Check if user still exists
@@ -158,7 +266,7 @@ exports.restrictTo = (...roles) => {
     // roles ['admin', 'lead-guide']. role='user'
     if (!roles.includes(req.user.role)) {
       return next(
-        new AppError('You do not have permission to perform this action', 403)
+        new AppError('You do not have permission to perform this action', 403),
       );
     }
 
@@ -180,13 +288,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 3) Send it to user's email
   try {
     const resetURL = `${req.protocol}://${req.get(
-      'host'
+      'host',
     )}/api/v1/users/resetPassword/${resetToken}`;
     await new Email(user, resetURL).sendPasswordReset();
 
     res.status(200).json({
       status: 'success',
-      message: 'Token sent to email!'
+      message: 'Token sent to email!',
     });
   } catch (err) {
     user.passwordResetToken = undefined;
@@ -195,7 +303,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
     return next(
       new AppError('There was an error sending the email. Try again later!'),
-      500
+      500,
     );
   }
 });
@@ -209,7 +317,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({
     passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() }
+    passwordResetExpires: { $gt: Date.now() },
   });
 
   // 2) If token has not expired, and there is user, set the new password
