@@ -1,0 +1,12 @@
+extends base
+
+block content
+  main.main
+    .login-form
+      h2.heading-secondary.ma-bt-lg
+      form.form.form--loginByPhoneNumber
+        .form__group.ma-bt-md
+          label.form__label(for='phoneNumber') verify Phone number
+          input#phoneNumber.form__input(type='phoneNumber', placeholder='••••••••', required)
+        .form__group
+          button.btn.btn--green send number your phone
