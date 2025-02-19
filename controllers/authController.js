@@ -9,7 +9,7 @@ const axios = require('axios');
 
 userVerify = {
   '09175686964': 9958400,
-};
+}; 
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -81,13 +81,14 @@ exports.loginByPhoneNumber = catchAsync(async (req, res, next) => {
   }
   // 2) Check if user exists && password is correct
   const user = userVerify[phoneNumber] == verifyCode ? true : false;
+  console.log("🚀 ", userVerify)
   let findUser
   if (!user) {
     return next(new AppError('Incorrect code', 401));
   } else {
     findUser = await User.findOne({ phoneNumber });
     if (!findUser) {
-      await User.create({ phoneNumber });
+      findUser = await User.create({ phoneNumber });
     }
   }
 

@@ -4,14 +4,14 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-    name: {
+  name: {
     type: String,
-    default: "",
+    default: '',
     trim: true,
   },
   lastName: {
     type: String,
-    default: "",
+    default: '',
     trim: true,
   },
   nationalCode: {
@@ -21,12 +21,12 @@ const userSchema = new mongoose.Schema({
   },
   identityNumber: {
     type: String,
-    default: "",
+    default: '',
     trim: true,
   },
   fatherName: {
     type: String,
-    default: "",
+    default: '',
     trim: true,
   },
   birthYear: {
@@ -39,12 +39,12 @@ const userSchema = new mongoose.Schema({
     type: Number,
   },
   insuranceStart: {
-    type: Date,
-    default: null,
+    type: String,
+    default: '',
   },
   insuranceEnd: {
-    type: Date,
-    default: null,
+    type: String,
+    default: '',
   },
   gender: {
     type: String,
@@ -54,12 +54,17 @@ const userSchema = new mongoose.Schema({
   },
   relationWithInsured: {
     type: String,
-    default: "",
+    default: '',
     trim: true,
   },
   dependentType: {
     type: String,
-    default: "",
+    default: '',
+    trim: true,
+  },
+  DependentNumber: {
+    type: String,
+    default: '',
     trim: true,
   },
   phoneNumber: {
@@ -72,31 +77,34 @@ const userSchema = new mongoose.Schema({
     unique: true,
     trim: true,
   },
+  userDependent: {
+    type: [Object],
+  },
   photo: {
     type: String,
-    default: 'default.jpg'
+    default: 'default.jpg',
   },
   role: {
     type: String,
     enum: ['user', 'guide', 'lead-guide', 'admin'],
-    default: 'user'
+    default: 'user',
   },
   password: {
     type: String,
     // required: [true, 'Please provide a password'],
     minlength: 8,
-    select: false
+    select: false,
   },
   passwordConfirm: {
     type: String,
     // required: [true, 'Please confirm your password'],
     validate: {
       // This only works on CREATE and SAVE!!!
-      validator: function(el) {
+      validator: function (el) {
         return el === this.password;
       },
-      message: 'Passwords are not the same!'
-    }
+      message: 'Passwords are not the same!',
+    },
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
@@ -104,8 +112,8 @@ const userSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true,
-    select: false
-  }
+    select: false,
+  },
 });
 
 userSchema.pre('save', async function(next) {

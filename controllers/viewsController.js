@@ -63,7 +63,7 @@ exports.getVerifyPhoneNumberForm = (req, res) => {
 
 exports.getAccount = (req, res) => {
   res.status(200).render('account', {
-    title: 'ورود به سامانه'
+    title: 'پنل کاربری'
   });
 };
 

@@ -11,6 +11,7 @@ block content
   main.main
     .user-view
       nav.user-view__menu
+
       .user-view__content
         .user-view__form-container
           h2.heading-secondary.ma-bt-md Your account
@@ -26,10 +27,10 @@ block content
                 input#name.form__input(type='text', value=`${user.name}`, name='name')
               .form__group.ma-bt-md
                 label.form__label(for='lastName') نام خانوادگی
-                input#lastName.form__input(type='text', value=`${user.lastName ? "" : user.lastName}`, name='lastName')
+                input#lastName.form__input(type='text', value=`${user.lastName ? user.lastName : ""}`, name='lastName')
               .form__group.ma-bt-md
                 label.form__label(for='nationalCode') کد ملی
-                input#nationalCode.form__input(type='text', value=`${user.nationalCode ? user.nationalCode : ""}`, name='nationalCode')
+                input#nationalCode.form__input(type='text', value=`${user.nationalCode ? user.nationalCode : ""}`, name='nationalCode' , minlength=10)
               .form__group.ma-bt-md
                 label.form__label(for='identityNumber') شماره شناسنامه
                 input#identityNumber.form__input(type='text', value=`${user.identityNumber}`, name='identityNumber')
@@ -48,7 +49,7 @@ block content
                   input#birthDay.form__input(type='number', value=`${user.birthDay}`, name='birthDay')
                 .form__group.ma-bt-md
                   label.form__label(for='insuranceStart') شروع بیمه
-                  input#insuranceStart.form__input(type='text', value=`${user.insuranceStart ? user.insuranceStart : ""}`, name='insuranceStart')
+                  input#insuranceStart.form__input(type='text',placeholder="1401/3/2", value=`${user.insuranceStart ? user.insuranceStart : ""}`, name='insuranceStart')
             .de-flex
               .form__group.ma-bt-md
                 label.form__label(for='insuranceEnd') پایان بیمه
@@ -63,13 +64,67 @@ block content
                 label.form__label(for='dependentType') نوع تحت کفل
                 input#dependentType.form__input(type='text', value=`${user.dependentType ? user.dependentType : ""}`, name='dependentType')
               .form__group.ma-bt-md
+                label.form__label(for='DependentNumber') تعداد تحت تکفل
+                input#DependentNumber.form__input(type='number', value=`${user.DependentNumber ? user.DependentNumber : ""}`, name='DependentNumber')
+              .form__group.ma-bt-md
                 label.form__label(for='phoneNumber') شماره موبایل
                 input#phoneNumber.form__input(type='tel', value=`${user.phoneNumber}`, name='phoneNumber')
             .form__group.ma-bt-md
               label.form__label(for='bankAccountIBAN') شماره شبا حساب  
-              input#bankAccountIBAN.form__input(type='text', value=`${user.bankAccountIBAN ? user.bankAccountIBAN : ""}`, name='bankAccountIBAN')
-            .form__group.right
-              button.btn.btn--small.btn--green Save settings  
+              input#bankAccountIBAN.form__input(type='text', placeholder="IR980150000000012345678901", value=`${user.bankAccountIBAN ? user.bankAccountIBAN : ""}`, name='bankAccountIBAN', minlength=26)
+            if user.DependentNumber
+              - for (let i = 0; i < user.DependentNumber; i++)
+                .line &nbsp;
+                .de-flex
+                  .form__group
+                    label.form__label(for='name') نام
+                    input#name.form__input(type='text', value= user.userDependent[i].name, name='name')
+                  .form__group.ma-bt-md
+                    label.form__label(for='lastName') نام خانوادگی
+                    input#lastName.form__input(type='text',value= user.userDependent[i].lastName, name='lastName')
+                  .form__group.ma-bt-md
+                    label.form__label(for='nationalCode') کد ملی
+                    input#nationalCode.form__input(type='text',value= user.userDependent[i].nationalCode, name='nationalCode' , minlength=10)
+                  .form__group.ma-bt-md
+                    label.form__label(for='identityNumber') شماره شناسنامه
+                    input#identityNumber.form__input(type='text',value= user.userDependent[i].identityNumber, name='identityNumber')
+                .de-flex
+                    .form__group.ma-bt-md
+                      label.form__label(for='fatherName') نام پدر
+                      input#fatherName.form__input(type='text',value= user.userDependent[i].fatherName, name='fatherName')
+                    .form__group.ma-bt-md
+                      label.form__label(for='birthYear') سال تولد
+                      input#birthYear.form__input(type='number',value= user.userDependent[i].birthYear, name='birthYear')
+                    .form__group.ma-bt-md
+                      label.form__label(for='birthMonth') ماه تولد
+                      input#birthMonth.form__input(type='number',value= user.userDependent[i].birthMonth, name='birthMonth')
+                    .form__group.ma-bt-md
+                      label.form__label(for='birthDay') روز تولد
+                      input#birthDay.form__input(type='number',value= user.userDependent[i].birthDay, name='birthDay')
+                    .form__group.ma-bt-md
+                      label.form__label(for='insuranceStart') شروع بیمه
+                      input#insuranceStart.form__input(type='text',placeholder="1401/3/2",value= user.userDependent[i].insuranceStart, name='insuranceStart')
+                .de-flex
+                  .form__group.ma-bt-md
+                    label.form__label(for='insuranceEnd') پایان بیمه
+                    input#insuranceEnd.form__input(type='text',placeholder="1401/3/2",value= user.userDependent[i].insuranceEnd, name='insuranceEnd')
+                  .form__group.ma-bt-md
+                    label.form__label(for='insuredType') نوع بیمه
+                    input#insuredType.form__input(type='text', value= user.userDependent[i].insuredType, name='insuredType')
+                  .form__group.ma-bt-md
+                    label.form__label(for='relationWithInsured') نسبت با بیمه شده
+                    input#relationWithInsured.form__input(type='text',value= user.userDependent[i].relationWithInsured, name='relationWithInsured')
+                  .form__group.ma-bt-md
+                    label.form__label(for='dependentType') نوع تحت کفل
+                    input#dependentType.form__input(type='text',value= user.userDependent[i].dependentType, name='dependentType')
+                  .form__group.ma-bt-md
+                    label.form__label(for='phoneNumber') شماره موبایل
+                    input#phoneNumber.form__input(type='tel',value= user.userDependent[i].phoneNumber, name='phoneNumber')
+                .form__group.ma-bt-md
+                  label.form__label(for='bankAccountIBAN') شماره شبا حساب  
+                  input#bankAccountIBAN.form__input(type='text',placeholder="IR980150000000012345678901" ,value= user.userDependent[i].bankAccountIBAN, name='bankAccountIBAN', minlength=26)
+                  
+            button.btn.btn--small.btn--green Save settings  
         
         //- .user-view__form-container
         //-   h2.heading-secondary.ma-bt-md Password change
